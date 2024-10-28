@@ -56,7 +56,7 @@ data_quality_report = {
 
 data_quality_report_df = pd.DataFrame(data_quality_report)
 
-# Improved PDF Generation
+# PDF Generation
 class PDF(FPDF):
     def header(self):
         self.set_font("Arial", "B", 14)
@@ -136,14 +136,6 @@ class PDF(FPDF):
     def header(self):
         self.set_font("Arial", "B", 12)
         self.cell(0, 10, "Data Quality Report - Clinic Table Data Records", border=0, ln=True, align="C")
-        #self.ln(10)
-        # self.set_font("Arial", "B", 12)
-        # for i, col_name in enumerate(dataframe.columns):
-            # self.cell(self.col_widths[i], 10, col_name, border=1, align="C")
-        # self.ln(10)  # Move to the next line after headers
-        #for i, col_name in enumerate(dataframe.columns):
-        #    self.cell(col_widths[i], 10, col_name, border=1, align="C")
-        #self.ln()
 
     def footer(self):
         self.set_y(-15)
@@ -153,32 +145,22 @@ class PDF(FPDF):
     def add_section_title(self, title):
         self.set_font("Arial", "B", 12)
         self.cell(0, 10, title, ln=True, align="L")
-        # self.ln(5)
 
     def create_table(self, dataframe, section_title):
-        # self.add_section_title(section_title)
+        self.add_section_title(section_title)
         self.set_font("Arial", size=10)
-        col_widths = [self.get_string_width(str(col)) + 10 for col in dataframe.columns]
-        col_widths = [max(width, 30) for width in col_widths]
-        col_names = dataframe.columns
-
-
+    
+        # Determine column widths dynamically
+        col_widths = [max(self.get_string_width(str(col)) + 15, 20) for col in dataframe.columns]
+        
         # Add headers
-        #self.set_font("Arial", "B", 12)
+        self.set_font("Arial", "B", 12)
         for i, col_name in enumerate(dataframe.columns):
             self.cell(col_widths[i], 10, col_name, border=1, align="C")
-        
-        #self.ln()
-        # self.header()
+        self.ln()  # Move to the next line after headers
 
         # Add rows
         self.set_font("Arial", size=10)
-        for row in dataframe.itertuples(index=False):
-            for i, cell_value in enumerate(row):
-                self.cell(col_widths[i], 10, str(cell_value), border=1, align="C")
-        #    self.ln()
-
-        # Add rows
         for row in dataframe.itertuples(index=False):
             max_height = 10  # Default cell height
             for i, cell_value in enumerate(row):
@@ -197,15 +179,10 @@ class PDF(FPDF):
             self.ln(max_height)  # Move to the next line after each row
 
             # Check if a page break is needed
-            if self.get_y() + max_height +20 > self.page_break_trigger:
+            if self.get_y() + max_height + 20 > self.page_break_trigger:
                 self.add_page()
                 self.set_xy(10, 20)  # Reset x position after page break
-                # self.ln()
-                #for i, col_name in enumerate(dataframe.columns):
-                #    self.cell(col_widths[i], 10, col_name, border=1, align="C")
-        
 
-            # self.ln(max_height)  # Move to the next line after each row
 
 # Create PDF and add tables
 pdf = PDF()
