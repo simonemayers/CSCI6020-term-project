@@ -81,11 +81,26 @@ class PDF(FPDF):
         # Add rows
         self.set_font("Arial", size=10)
         for row in dataframe.itertuples(index=False):
-            self.cell(col_widths[0], 10, str(row[0]), border=1)
-            self.cell(col_widths[1], 10, str(row[1]), border=1)
-            self.cell(col_widths[2], 10, str(row[2]), border=1, align="C")
-            self.cell(col_widths[3], 10, str(row[3]), border=1, align="C")
-            self.ln()
+            max_height = 5  # Default cell height
+            for i, cell_value in enumerate(row):
+                cell_text = str(cell_value)
+                if i == 0:  # Apply word wrap to the first column
+                    x_before = self.get_x()
+                    y_before = self.get_y()
+                    self.multi_cell(col_widths[i], max_height, cell_text, border=1, align="L")
+                    x_after = self.get_x()
+                    y_after = self.get_y()
+                    max_height = max(max_height, y_after - y_before)
+                    self.set_xy(x_before + col_widths[i], y_before)  # Move to the right of the wrapped cell
+                else:
+                    self.cell(col_widths[i], max_height, cell_text, border=1, align="C")
+            
+            self.ln(max_height)  # Move to the next line after each row
+
+            # Check if a page break is needed
+            if self.get_y() + max_height + 20 > self.page_break_trigger:
+                self.add_page()
+                self.set_xy(10, 20)  # Reset x position after page break
 
 # Create PDF and add table
 pdf = PDF()
@@ -106,7 +121,7 @@ categorical_cols = clinic_table_data.select_dtypes(include=[object])
 # Data Quality Report for Numerical Columns
 numerical_report = pd.DataFrame({
     'Column Name': numerical_cols.columns,
-    'Data Type': numerical_cols.dtypes,
+    #'Data Type': numerical_cols.dtypes,
     'Missing Values (%)': (numerical_cols.isnull().sum() / len(clinic_table_data)).round(2) * 100,
     'Mean': numerical_cols.mean().round(2),
     'Median': numerical_cols.median().round(2),
@@ -119,7 +134,7 @@ numerical_report = pd.DataFrame({
 # Data Quality Report for Categorical Columns
 categorical_report = pd.DataFrame({
     'Column Name': categorical_cols.columns,
-    'Data Type': categorical_cols.dtypes,
+    #'Data Type': categorical_cols.dtypes,
     'Missing Values (%)': (categorical_cols.isnull().sum() / len(clinic_table_data)) * 100,
     'Unique Values': categorical_cols.nunique(),
     'Most Frequent Value': categorical_cols.mode().iloc[0],
@@ -151,7 +166,7 @@ class PDF(FPDF):
         self.set_font("Arial", size=10)
     
         # Determine column widths dynamically
-        col_widths = [max(self.get_string_width(str(col)) + 15, 20) for col in dataframe.columns]
+        col_widths = [max(self.get_string_width(str(col)) + 20, 20) for col in dataframe.columns]
         
         # Add headers
         self.set_font("Arial", "B", 12)
@@ -162,13 +177,13 @@ class PDF(FPDF):
         # Add rows
         self.set_font("Arial", size=10)
         for row in dataframe.itertuples(index=False):
-            max_height = 10  # Default cell height
+            max_height = 5  # Default cell height
             for i, cell_value in enumerate(row):
                 cell_text = str(cell_value)
                 if i == 0:  # Apply word wrap to the first column
                     x_before = self.get_x()
                     y_before = self.get_y()
-                    self.multi_cell(col_widths[i], 10, cell_text, border=1, align="L")
+                    self.multi_cell(col_widths[i], max_height, cell_text, border=1, align="L")
                     x_after = self.get_x()
                     y_after = self.get_y()
                     max_height = max(max_height, y_after - y_before)
