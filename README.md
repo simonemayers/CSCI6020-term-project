@@ -57,6 +57,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📧 Contact
 
-For any questions or inquiries, feel free to connect with me on LinkedIn, https://www.linkedin.com/in/simone-mayers/.
+For any questions or inquiries, feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/simone-mayers/).
 
 
